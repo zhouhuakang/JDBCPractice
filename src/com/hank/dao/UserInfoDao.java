@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.hank.db.DBUtil;
 import com.hank.modal.UserInfo;
@@ -75,6 +76,38 @@ public class UserInfoDao {
 		Statement statement = conn.createStatement();
 		ResultSet resultSet = statement
 				.executeQuery("select user_name,age from user_info");
+		List<UserInfo> userInfos = new ArrayList<UserInfo>();
+		UserInfo userInfo = null;
+		while (resultSet.next()) {
+			userInfo = new UserInfo();
+			userInfo.setUser_name(resultSet.getString("user_name"));
+			userInfo.setAge(Integer.valueOf(resultSet.getInt("age")));
+
+			userInfos.add(userInfo);
+		}
+		return userInfos;
+	}
+
+	public List<UserInfo> query(List<Map<String, Object>> params)
+			throws Exception {
+		Connection conn = DBUtil.getConnection();
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("select * from user_info where 1=1");
+
+		if (params != null && params.size() > 0) {
+			for (int i = 0; i < params.size(); i++) {
+				Map<String, Object> param = params.get(i);
+				sb.append(" and " + param.get("name") + " "
+						+ param.get("relation") + " " + param.get("value"));
+			}
+		}
+		System.out.println(sb.toString());
+
+		PreparedStatement pst = conn.prepareStatement(sb.toString());
+		ResultSet resultSet = pst.executeQuery();
+
 		List<UserInfo> userInfos = new ArrayList<UserInfo>();
 		UserInfo userInfo = null;
 		while (resultSet.next()) {
